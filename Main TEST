@@ -1,0 +1,129 @@
+import tkinter as tk
+
+
+class App:
+
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Northcote K-block demon hunters")
+        self.root.attributes("-fullscreen", True)
+
+        self.main_canvas = tk.Canvas(self.root, background="#F0F0F0")
+        self.main_canvas.pack(fill="both", expand=True)
+
+        self.speed = 5
+        self.player_size = 20
+
+        # World Position of the player
+        self.player_x = 0
+        self.player_y = 0
+
+        # Define Wall obstacles in World Coordinates: (x1, y1, x2, y2)
+        self.walls_world = [
+            (-100, -150, 100, -100),  # Top wall
+            (150, -100, 200, 200),  # Right side pillar
+        ]
+
+        # Draw Wall visuals on canvas
+        self.wall_items = []
+        for _ in self.walls_world:
+            wall_id = self.main_canvas.create_rectangle(
+                0, 0, 0, 0, fill="#FF6B6B", outline=""
+            )
+            self.wall_items.append(wall_id)
+
+        # Draw Player Visual
+        self.player_block = self.main_canvas.create_rectangle(
+            0, 0, 0, 0, fill="#92EEFF", outline=""
+        )
+
+        self.pressed_keys = set()
+        self.root.bind("<KeyPress>", self.on_key_press)
+        self.root.bind("<KeyRelease>", self.on_key_release)
+        self.root.bind("<Escape>", lambda e: self.root.destroy())  # Easy exit
+
+        self.game_loop()
+
+    def on_key_press(self, event):
+        self.pressed_keys.add(event.keysym.lower())
+
+    def on_key_release(self, event):
+        self.pressed_keys.discard(event.keysym.lower())
+
+    def check_collision(self, next_x, next_y):
+        """Checks if player bounding box at (next_x, next_y) intersects any wall."""
+        half_size = self.player_size / 2
+        p_left = next_x - half_size
+        p_right = next_x + half_size
+        p_top = next_y - half_size
+        p_bottom = next_y + half_size
+
+        for wx1, wy1, wx2, wy2 in self.walls_world:
+            if not (
+                p_right <= wx1
+                or p_left >= wx2
+                or p_bottom <= wy1
+                or p_top >= wy2
+            ):
+                return True
+        return False
+
+    def render_world(self):
+        """Renders walls relative to the player, keeping the player strictly centered."""
+        screen_w = self.main_canvas.winfo_width()
+        screen_h = self.main_canvas.winfo_height()
+
+        if screen_w <= 1:
+            screen_w, screen_h = 600, 400
+
+        center_x = screen_w / 2
+        center_y = screen_h / 2
+
+        # 1. Position Walls relative to player's position
+        for item_id, (wx1, wy1, wx2, wy2) in zip(
+            self.wall_items, self.walls_world
+        ):
+            sx1 = wx1 - self.player_x + center_x
+            sy1 = wy1 - self.player_y + center_y
+            sx2 = wx2 - self.player_x + center_x
+            sy2 = wy2 - self.player_y + center_y
+            self.main_canvas.coords(item_id, sx1, sy1, sx2, sy2)
+
+        # 2. Player stays locked at screen center
+        half_p = self.player_size / 2
+        px1 = center_x - half_p
+        py1 = center_y - half_p
+        px2 = center_x + half_p
+        py2 = center_y + half_p
+
+        self.main_canvas.coords(self.player_block, px1, py1, px2, py2)
+
+    def game_loop(self):
+        dx, dy = 0, 0
+
+        if "up" in self.pressed_keys or "w" in self.pressed_keys:
+            dy -= self.speed
+        if "down" in self.pressed_keys or "s" in self.pressed_keys:
+            dy += self.speed
+        if "left" in self.pressed_keys or "a" in self.pressed_keys:
+            dx -= self.speed
+        if "right" in self.pressed_keys or "d" in self.pressed_keys:
+            dx += self.speed
+
+        # Move player horizontally if no collision
+        if dx != 0 and not self.check_collision(self.player_x + dx, self.player_y):
+            self.player_x += dx
+
+        # Move player vertically if no collision
+        if dy != 0 and not self.check_collision(self.player_x, self.player_y + dy):
+            self.player_y += dy
+
+        # Redraw scene with centered camera tracking
+        self.render_world()
+
+        self.root.after(16, self.game_loop)
+
+
+if __name__ == "__main__":
+    app = App()
+    app.root.mainloop()
