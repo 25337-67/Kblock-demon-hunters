@@ -28,6 +28,7 @@ class App:
         self.walls_world = [
             (-100, -150, 100, -100),  # Top wall
             (150, -100, 200, 200),  # Right side pillar
+            (-200, -150, -150, 150)
         ]
 
         # Draw Wall visuals on canvas
