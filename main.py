@@ -18,6 +18,12 @@ class App:
         self.player_x = 0
         self.player_y = 0
 
+        # da enemy setup
+        self.enemy_size = 20
+        self.enemy_speed = 5
+        self.enemy_x = 300  #makes it so dat it starts away from da player  
+        self.enemy_y = 200
+
         # Define Wall obstacles in World Coordinates: (x1, y1, x2, y2)
         self.walls_world = [
             (-100, -150, 100, -100),  # Top wall
@@ -37,10 +43,21 @@ class App:
             0, 0, 0, 0, fill="#92EEFF", outline=""
         )
 
+        # ts draws the enemy visual
+        self.enemy_block = self.main_canvas.create_rectangle(
+             0, 0, 0, 0, fill="#05008B", outline=""
+        )
+
+        #creates da text marker 
+        self.hit_text = self.main_canvas.create_text(
+            0, 0, text="", fill="red", font=("Arial", 24, "bold")
+        )
+
+
         self.pressed_keys = set()
         self.root.bind("<KeyPress>", self.on_key_press)
         self.root.bind("<KeyRelease>", self.on_key_release)
-        self.root.bind("<Escape>", lambda e: self.root.destroy())  # Easy exit
+        self.root.bind("<Escape>", lambda e: self.root.destroy())  #exit
 
         self.game_loop()
 
@@ -67,6 +84,48 @@ class App:
             ):
                 return True
         return False
+
+
+
+
+
+    
+    def update_enemy(self):
+        #ts moves the enemy towards da players main positions
+        dx = self.player_x - self.enemy_x
+        dy = self.player_y - self.enemy_y
+        dist = (dx**2 + dy**2) ** 0.5
+
+        if dist != 0:
+            #moves along da vector pointing towards da player   
+            self.enemy_x += (dx / dist) * self.enemy_speed
+            self.enemy_y += (dy / dist) * self.enemy_speed
+
+
+
+
+    def check_enemy_hit(self):
+        #dis check da box collision between player and enemy
+        half_p = self.player_size / 2
+        half_e = self.enemy_size / 2
+
+        p_left, p_right = self.player_x - half_p, self.player_x + half_p
+        p_top, p_bottom = self.player_y - half_p, self.player_y + half_p
+
+        e_left, e_right = self.enemy_x - half_e, self.enemy_x + half_e
+        e_top, e_bottom = self.enemy_y - half_e, self.enemy_y + half_e
+
+        #checks for overlaps
+        if not (
+            p_right <= e_left
+            or p_left >= e_right
+            or p_bottom <= e_top
+            or p_top >= e_bottom
+        ):
+            return True
+        return False
+
+
 
     def render_world(self):
         """Renders walls relative to the player, keeping the player strictly centered."""
@@ -98,6 +157,30 @@ class App:
 
         self.main_canvas.coords(self.player_block, px1, py1, px2, py2)
 
+
+
+        #positions da enemy relative to da players position in da world
+        half_e = self.enemy_size / 2
+        ex1 = (self.enemy_x - self.player_x + center_x) - half_e
+        ey1 = (self.enemy_y - self.player_y + center_y) - half_e
+        ex2 = (self.enemy_x - self.player_x + center_x) + half_e
+        ey2 = (self.enemy_y - self.player_y + center_y) + half_e
+
+
+
+
+        self.main_canvas.coords(self.enemy_block, ex1, ey1, ex2, ey2)
+
+        #dis would diaplay da word hit! on top of da player position when dey take dmg
+        if self.check_enemy_hit():
+                    self.main_canvas.coords(self.hit_text, center_x, center_y - 30)
+                    self.main_canvas.itemconfig(self.hit_text, text="HIT!")
+        else:
+                    self.main_canvas.itemconfig(self.hit_text, text="")
+
+
+
+
     def game_loop(self):
         dx, dy = 0, 0
 
@@ -118,6 +201,11 @@ class App:
         if dy != 0 and not self.check_collision(self.player_x, self.player_y + dy):
             self.player_y += dy
 
+
+        #updates da enemy position
+        self.update_enemy()
+
+        
         # Redraw scene with centered camera tracking
         self.render_world()
 
