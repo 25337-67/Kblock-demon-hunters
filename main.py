@@ -1,15 +1,14 @@
-import tkinter as tk
+import sys
+import pygame
 
 
 class App:
 
     def __init__(self):
-        self.root = tk.Tk()
-        self.root.title("Northcote K-block demon hunters")
-        self.root.attributes("-fullscreen", True)
-
-        self.main_canvas = tk.Canvas(self.root, background="#F0F0F0")
-        self.main_canvas.pack(fill="both", expand=True)
+        pygame.init()
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        pygame.display.set_caption("Northcote K-block demon hunters")
+        self.clock = pygame.time.Clock()
 
         self.speed = 5
         self.player_size = 20
@@ -19,57 +18,27 @@ class App:
         self.player_y = 0
 
         # da enemy setup
+        # this is the dimensions of the enemy collision box 20x20 pixels square
         self.enemy_size = 20
+        # the movement step per frame in pixels moves 5 units to the player every tick
         self.enemy_speed = 5
-        self.enemy_x = 300  #makes it so dat it starts away from da player  
-        self.enemy_y = 200
+        # the initial spawning position in world coordinates which is relative to player origin
+        self.enemy_x = 300  # Starts 300 units to the right of origin
+        self.enemy_y = 200  # Starts 200 units below origin
+
+        # the font setup for the hit text marker
+        self.font = pygame.font.SysFont("Arial", 24, bold=True)
 
         # Define Wall obstacles in World Coordinates: (x1, y1, x2, y2)
         self.walls_world = [
             (-100, -150, 100, -100),  # Top wall
             (150, -100, 200, 200),  # Right side pillar
-            (-200, -150, -150, 150)
+            (-200, -150, -150, 150),
         ]
 
-        # Draw Wall visuals on canvas
-        self.wall_items = []
-        for _ in self.walls_world:
-            wall_id = self.main_canvas.create_rectangle(
-                0, 0, 0, 0, fill="#FF6B6B", outline=""
-            )
-            self.wall_items.append(wall_id)
-
-        # Draw Player Visual
-        self.player_block = self.main_canvas.create_rectangle(
-            0, 0, 0, 0, fill="#92EEFF", outline=""
-        )
-
-        # ts draws the enemy visual
-        self.enemy_block = self.main_canvas.create_rectangle(
-             0, 0, 0, 0, fill="#05008B", outline=""
-        )
-
-        #creates da text marker 
-        self.hit_text = self.main_canvas.create_text(
-            0, 0, text="", fill="red", font=("Arial", 24, "bold")
-        )
-
-
-        self.pressed_keys = set()
-        self.root.bind("<KeyPress>", self.on_key_press)
-        self.root.bind("<KeyRelease>", self.on_key_release)
-        self.root.bind("<Escape>", lambda e: self.root.destroy())  #exit
-
-        self.game_loop()
-
-    def on_key_press(self, event):
-        self.pressed_keys.add(event.keysym.lower())
-
-    def on_key_release(self, event):
-        self.pressed_keys.discard(event.keysym.lower())
+        self.run_game()
 
     def check_collision(self, next_x, next_y):
-        """Checks if player bounding box at (next_x, next_y) intersects any wall."""
         half_size = self.player_size / 2
         p_left = next_x - half_size
         p_right = next_x + half_size
@@ -77,6 +46,8 @@ class App:
         p_bottom = next_y + half_size
 
         for wx1, wy1, wx2, wy2 in self.walls_world:
+            # the correct Axis-Aligned Bounding Box collision checks
+            # If player is completely to the left, right, top, or bottom of wall, NO collision.
             if not (
                 p_right <= wx1
                 or p_left >= wx2
@@ -86,37 +57,36 @@ class App:
                 return True
         return False
 
-
-
-
-
-    
     def update_enemy(self):
-        #ts moves the enemy towards da players main positions
+        # this moves the enemy towards da players main positions
+        # the calculation for the distance vector components from enemy to player
         dx = self.player_x - self.enemy_x
         dy = self.player_y - self.enemy_y
+        # distance formula
         dist = (dx**2 + dy**2) ** 0.5
 
         if dist != 0:
-            #moves along da vector pointing towards da player   
+            # this normalizes vector (dx/dist, dy/dist) for unit direction,
+            # which then scales by enemy_speed to step toward the player's position
             self.enemy_x += (dx / dist) * self.enemy_speed
             self.enemy_y += (dy / dist) * self.enemy_speed
 
-
-
-
     def check_enemy_hit(self):
-        #dis check da box collision between player and enemy
+        """Checks bounding box collision between player and enemy."""
+        # Calculates the extent offsets from center coordinates for both entities
         half_p = self.player_size / 2
         half_e = self.enemy_size / 2
 
+        # players axis-aligned Bounding Box boundaries
         p_left, p_right = self.player_x - half_p, self.player_x + half_p
         p_top, p_bottom = self.player_y - half_p, self.player_y + half_p
 
+        # enemy  axis-aligned Bounding Box boundaries
         e_left, e_right = self.enemy_x - half_e, self.enemy_x + half_e
         e_top, e_bottom = self.enemy_y - half_e, self.enemy_y + half_e
 
-        #checks for overlaps
+        # axis-aligned Bounding Box  Overlap Test
+        # this returns True if boxes overlap on both X and Y axes
         if not (
             p_right <= e_left
             or p_left >= e_right
@@ -126,93 +96,99 @@ class App:
             return True
         return False
 
+    def run_game(self):
+        running = True
+        while running:
+            # 1. Event Handling
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or (
+                    event.type == pygame.KEYDOWN
+                    and event.key == pygame.K_ESCAPE
+                ):
+                    running = False
 
+            # 2. Continuous Input Handling
+            keys = pygame.key.get_pressed()
+            dx, dy = 0, 0
+            if keys[pygame.K_w] or keys[pygame.K_UP]:
+                dy -= self.speed
+                print('work')
+            if keys[pygame.K_s] or keys[pygame.K_DOWN]:
+                dy += self.speed
+            if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+                dx -= self.speed
+            if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+                dx += self.speed
 
-    def render_world(self):
-        """Renders walls relative to the player, keeping the player strictly centered."""
-        screen_w = self.main_canvas.winfo_width()
-        screen_h = self.main_canvas.winfo_height()
+            # 3. Update Position with Collisions
+            if dx != 0 and not self.check_collision(
+                self.player_x + dx, self.player_y
+            ):
+                self.player_x += dx
+            if dy != 0 and not self.check_collision(
+                self.player_x, self.player_y + dy
+            ):
+                self.player_y += dy
 
-        if screen_w <= 1:
-            screen_w, screen_h = 600, 400
+            # this updates the enemy position
+            self.update_enemy()
 
-        center_x = screen_w / 2
-        center_y = screen_h / 2
+            # 4. Render Frame
+            self.screen.fill((240, 240, 240))  # Background #F0F0F0
+            screen_w, screen_h = self.screen.get_size()
+            center_x, center_y = screen_w / 2, screen_h / 2
 
-        # 1. Position Walls relative to player's world position
-        for item_id, (wx1, wy1, wx2, wy2) in zip(
-            self.wall_items, self.walls_world
-        ):
-            sx1 = wx1 - self.player_x + center_x
-            sy1 = wy1 - self.player_y + center_y
-            sx2 = wx2 - self.player_x + center_x
-            sy2 = wy2 - self.player_y + center_y
-            self.main_canvas.coords(item_id, sx1, sy1, sx2, sy2)
+            # Draw Walls relative to camera
+            for wx1, wy1, wx2, wy2 in self.walls_world:
+                sx1 = wx1 - self.player_x + center_x
+                sy1 = wy1 - self.player_y + center_y
+                sx2 = wx2 - self.player_x + center_x
+                sy2 = wy2 - self.player_y + center_y
 
-        # 2. Player stays permanently locked at screen center
-        half_p = self.player_size / 2
-        px1 = center_x - half_p
-        py1 = center_y - half_p
-        px2 = center_x + half_p
-        py2 = center_y + half_p
+                wall_rect = pygame.Rect(sx1, sy1, sx2 - sx1, sy2 - sy1)
+                pygame.draw.rect(
+                    self.screen, (255, 107, 107), wall_rect
+                )  # #FF6B6B
 
-        self.main_canvas.coords(self.player_block, px1, py1, px2, py2)
+            # Draw Player at screen center
+            half_p = self.player_size / 2
+            player_rect = pygame.Rect(
+                center_x - half_p,
+                center_y - half_p,
+                self.player_size,
+                self.player_size,
+            )
+            pygame.draw.rect(
+                self.screen, (146, 238, 255), player_rect
+            )  # #92EEFF
 
+            # this positions the enemy relative to the players position in the world
+            # turns the enemy world coordinates to relative screen coordinates 
+            half_e = self.enemy_size / 2
+            ex1 = (self.enemy_x - self.player_x + center_x) - half_e
+            ey1 = (self.enemy_y - self.player_y + center_y) - half_e
+            enemy_rect = pygame.Rect(
+                ex1, ey1, self.enemy_size, self.enemy_size
+            )
 
+            # this draws the enemy visual 
+            pygame.draw.rect(self.screen, (5, 0, 139), enemy_rect)
 
-        #positions da enemy relative to da players position in da world
-        half_e = self.enemy_size / 2
-        ex1 = (self.enemy_x - self.player_x + center_x) - half_e
-        ey1 = (self.enemy_y - self.player_y + center_y) - half_e
-        ex2 = (self.enemy_x - self.player_x + center_x) + half_e
-        ey2 = (self.enemy_y - self.player_y + center_y) + half_e
+            # this displays "HIT!" over player position when it o
+            # this renders the hit notification text surface directly above player center if touching
+            if self.check_enemy_hit():
+                text_surface = self.font.render("HIT!", True, (255, 0, 0))
+                text_rect = text_surface.get_rect(
+                    center=(center_x, center_y - 30)
+                )
+                self.screen.blit(text_surface, text_rect)
 
+            pygame.display.flip()
+            self.clock.tick(60)  # Lock to 60 FPS (~16ms per frame)
 
-
-
-        self.main_canvas.coords(self.enemy_block, ex1, ey1, ex2, ey2)
-
-        #dis would diaplay da word hit! on top of da player position when dey take dmg
-        if self.check_enemy_hit():
-                    self.main_canvas.coords(self.hit_text, center_x, center_y - 30)
-                    self.main_canvas.itemconfig(self.hit_text, text="HIT!")
-        else:
-                    self.main_canvas.itemconfig(self.hit_text, text="")
-
-
-
-
-    def game_loop(self):
-        dx, dy = 0, 0
-
-        if "up" in self.pressed_keys or "w" in self.pressed_keys:
-            dy -= self.speed
-        if "down" in self.pressed_keys or "s" in self.pressed_keys:
-            dy += self.speed
-        if "left" in self.pressed_keys or "a" in self.pressed_keys:
-            dx -= self.speed
-        if "right" in self.pressed_keys or "d" in self.pressed_keys:
-            dx += self.speed
-
-        # Move player horizontally if no collision
-        if dx != 0 and not self.check_collision(self.player_x + dx, self.player_y):
-            self.player_x += dx
-
-        # Move player vertically if no collision
-        if dy != 0 and not self.check_collision(self.player_x, self.player_y + dy):
-            self.player_y += dy
-
-
-        #updates da enemy position
-        self.update_enemy()
-
-        
-        # Redraw scene with centered camera tracking
-        self.render_world()
-
-        self.root.after(16, self.game_loop)
+        pygame.quit()
+        sys.exit()
 
 
 if __name__ == "__main__":
-    app = App()
-    app.root.mainloop()
+    App()
