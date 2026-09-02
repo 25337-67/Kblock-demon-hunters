@@ -184,7 +184,7 @@ class App:
                 self.screen.blit(text_surface, text_rect)
 
             pygame.display.flip()
-            self.clock.tick(60)  # Lock to 60 FPS (~16ms per frame)
+            self.clock.tick(60)  # Locks to 60 FPS
 
         pygame.quit()
         sys.exit()
