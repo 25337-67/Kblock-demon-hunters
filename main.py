@@ -22,32 +22,31 @@ class App:
         self.enemy_size = 20
         # the movement step per frame in pixels moves 5 units to the player every tick
         self.enemy_speed = 5
-        # the initial spawning position in world coordinates which is relative to player origin
+        # Spawning position in world coordinates
         self.enemy_x = 300  # Starts 300 units to the right of origin
         self.enemy_y = 200  # Starts 200 units below origin
 
         # the font setup for the hit text marker
         self.font = pygame.font.SysFont("Arial", 24, bold=True)
 
-        # Define Wall obstacles in World Coordinates: (x1, y1, x2, y2)
+        # Wall obstacles in World Coordinates: (x1, y1, x2, y2)
         self.walls_world = [
             (-100, -150, 100, -100),  # Top wall
             (150, -100, 200, 200),  # Right side pillar
-            (-200, -150, -150, 150),
+        (-200, -150, -150, 150),
         ]
 
         self.run_game()
 
-        def check_collision(self, next_x, next_y):
-            half_size = self.player_size / 2
-            p_left = next_x - half_size
-            p_right = next_x + half_size
-            p_top = next_y - half_size
-            p_bottom = next_y + half_size
+    def check_collision(self, next_x, next_y):
+        half_size = self.player_size / 2
+        p_left = next_x - half_size
+        p_right = next_x + half_size
+        p_top = next_y - half_size
+        p_bottom = next_y + half_size
 
         for wx1, wy1, wx2, wy2 in self.walls_world:
-            # the correct Axis-Aligned Bounding Box collision checks
-            # If player is completely to the left, right, top, or bottom of wall, NO collision.
+            # collision checks, If player is completely to the left, right, top, or bottom of wall, no collision.
             if not (
                 p_right <= wx1
                 or p_left >= wx2
@@ -57,15 +56,15 @@ class App:
                 return True
         return False
 
-        def check_enemy_wall_collision(self, next_x, next_y):
-            half_e = self.enemy_size / 2
-            e_left, e_right = next_x - half_e, next_x + half_e
-            e_top, e_bottom = next_y - half_e, next_y + half_e
+    def check_enemy_wall_collision(self, next_x, next_y):
+        half_e = self.enemy_size / 2
+        e_left, e_right = next_x - half_e, next_x + half_e
+        e_top, e_bottom = next_y - half_e, next_y + half_e
 
-            for wx1, wy1, wx2, wy2 in self.walls_world:
-                if not (e_right <= wx1 or e_left >= wx2 or e_bottom <= wy1 or e_top >= wy2):
-                    return True
-            return False
+        for wx1, wy1, wx2, wy2 in self.walls_world:
+            if not (e_right <= wx1 or e_left >= wx2 or e_bottom <= wy1 or e_top >= wy2):
+                return True
+        return False
 
     def update_enemy(self):
         #Enemy only moves if not touching player
@@ -79,16 +78,15 @@ class App:
         dist = (dx**2 + dy**2) ** 0.5
 
         if dist != 0:
-        
-            # enemy to move toward the player's position
-            self.enemy_x += (dx / dist) * self.enemy_speed
-            self.enemy_y += (dy / dist) * self.enemy_speed
-
+            # Calculate next positions
+            next_ex = self.enemy_x + (dx / dist) * self.enemy_speed
+            next_ey = self.enemy_y + (dy / dist) * self.enemy_speed
+            
             # Only update enemy coordinate if it won't intersect with a wall
-        if not self.check_enemy_wall_collision(next_ex, self.enemy_y):
-            self.enemy_x = next_ex
-        if not self.check_enemy_wall_collision(self.enemy_x, next_ey):
-            self.enemy_y = next_ey
+            if not self.check_enemy_wall_collision(next_ex, self.enemy_y):
+                self.enemy_x = next_ex
+            if not self.check_enemy_wall_collision(self.enemy_x, next_ey):
+                self.enemy_y = next_ey
 
     def check_enemy_hit(self):
         #Checks bounding box collision between player and enemy.
