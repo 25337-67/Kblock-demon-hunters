@@ -13,6 +13,18 @@ class App:
         self.speed = 5
         self.player_size = 20
 
+
+        # the playble character health setup
+        # the Maximum health points capacity
+        self.max_health = 3
+        # the current health remaining for the player
+        self.player_health = 3
+        # the cooldown to prevent losing all 3 hearts instantly when coming into contact with the enemy
+        self.hit_cooldown = 0
+        # Iframe duration 60 frames = 1 second buffer at 60 FPS
+        self.max_hit_cooldown = 60
+
+
         # World Position of the player
         self.player_x = 0
         self.player_y = 0
@@ -36,6 +48,16 @@ class App:
         (-200, -150, -150, 150),
         ]
 
+        # this loads the heart sprite images 
+        self.img_full = pygame.image.load("full_heart.png").convert_alpha()
+        self.img_half = pygame.image.load("half_heart.png").convert_alpha()
+        self.img_empty = pygame.image.load("empty_heart.png").convert_alpha()
+
+        # scales the heart sprites to 24x24 for the screen
+        heart_size = (24, 24)
+        self.img_full = pygame.transform.scale(self.img_full, heart_size)
+        self.img_half = pygame.transform.scale(self.img_half, heart_size)
+        self.img_empty = pygame.transform.scale(self.img_empty, heart_size)
         self.run_game()
 
     def check_collision(self, next_x, next_y):
@@ -67,7 +89,7 @@ class App:
         return False
 
     def update_enemy(self):
-        #Enemy only moves if not touching player
+        # the enemy only moves if not touching player
         if self.check_enemy_hit():
             return
         # this moves the enemy towards da players main positions
@@ -111,6 +133,39 @@ class App:
             return True
         return False
 
+
+
+    def drawing_ofplayer_health(self):
+        """
+        Renders the full, half, and empty heart sprites on top left of the screen based on  the players health.
+        
+        """
+        start_x = 25  # Fixed left offset from screen
+        start_y = 25  # Fixed top offset from screen 
+        spacing = 35  # the gap spacing between each heart 
+
+        # this loops through the maximum health capacity to check each heart slot
+        for i in range(self.max_health):
+            #  this calculates how much remaining health belongs to this specific heart slot (index i)
+            container_hp = self.player_health - i
+
+            # If the remaining value is 1 or higher, draw the full heart sprite
+            if container_hp >= 1.0:
+                sprite = self.img_full
+            # If the remaining value is exactly 0.5, draw a half heart sprite
+            elif container_hp == 0.5:
+                sprite = self.img_half
+            # If the remaining value is 0 or less, draw an empty heart sprite
+            else:
+                sprite = self.img_empty
+
+            # this Calculates the screens horizontal position for this heart
+            current_x = start_x + (i * spacing)
+
+            # this Draws the chosen heart sprite onto the screen
+            self.screen.blit(sprite, (current_x, start_y))
+
+
     def run_game(self):
         running = True
         while running:
@@ -148,8 +203,22 @@ class App:
             # this updates the enemy position
             self.update_enemy()
 
-            # Render Frame
-            self.screen.fill((240, 240, 240))  # Background #F0F0F0
+            # the health and iframe Cooldown setup
+            # iframe timer every frame tick
+            if self.hit_cooldown > 0:
+                self.hit_cooldown -= 1
+
+            # this Checks the enemy collision and deducts the players health if the player is not currently in iframes
+            if self.check_enemy_hit():
+                if self.hit_cooldown == 0 and self.player_health > 0:
+                    self.player_health -= 0.5  # this deducts half a heart
+                    self.hit_cooldown = (
+                        self.max_hit_cooldown  # this triggers temporary iframes
+                    )
+
+
+            # Render the Frame
+            self.screen.fill((240, 240, 240))  # Background
             screen_w, screen_h = self.screen.get_size()
             center_x, center_y = screen_w / 2, screen_h / 2
 
@@ -197,9 +266,10 @@ class App:
                 )
                 self.screen.blit(text_surface, text_rect)
 
-            pygame.display.flip()
-            self.clock.tick(60)  # Lock to 60 FPS (~16ms per frame)
+            self.drawing_ofplayer_health()
 
+            pygame.display.flip()
+            self.clock.tick(60)  # Lock to 60 FPS
         pygame.quit()
         sys.exit()
 
