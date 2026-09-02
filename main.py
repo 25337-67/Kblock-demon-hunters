@@ -38,12 +38,12 @@ class App:
 
         self.run_game()
 
-    def check_collision(self, next_x, next_y):
-        half_size = self.player_size / 2
-        p_left = next_x - half_size
-        p_right = next_x + half_size
-        p_top = next_y - half_size
-        p_bottom = next_y + half_size
+        def check_collision(self, next_x, next_y):
+            half_size = self.player_size / 2
+            p_left = next_x - half_size
+            p_right = next_x + half_size
+            p_top = next_y - half_size
+            p_bottom = next_y + half_size
 
         for wx1, wy1, wx2, wy2 in self.walls_world:
             # the correct Axis-Aligned Bounding Box collision checks
