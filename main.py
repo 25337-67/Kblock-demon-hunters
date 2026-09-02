@@ -57,7 +57,20 @@ class App:
                 return True
         return False
 
+        def check_enemy_wall_collision(self, next_x, next_y):
+            half_e = self.enemy_size / 2
+            e_left, e_right = next_x - half_e, next_x + half_e
+            e_top, e_bottom = next_y - half_e, next_y + half_e
+
+            for wx1, wy1, wx2, wy2 in self.walls_world:
+                if not (e_right <= wx1 or e_left >= wx2 or e_bottom <= wy1 or e_top >= wy2):
+                    return True
+            return False
+
     def update_enemy(self):
+        #Enemy only moves if not touching player
+        if self.check_enemy_hit():
+            return
         # this moves the enemy towards da players main positions
         # the calculation for the distance vector components from enemy to player
         dx = self.player_x - self.enemy_x
@@ -66,14 +79,19 @@ class App:
         dist = (dx**2 + dy**2) ** 0.5
 
         if dist != 0:
-            # this normalizes vector (dx/dist, dy/dist) for unit direction,
-            # which then scales by enemy_speed to step toward the player's position
+        
+            # enemy to move toward the player's position
             self.enemy_x += (dx / dist) * self.enemy_speed
             self.enemy_y += (dy / dist) * self.enemy_speed
 
+            # Only update enemy coordinate if it won't intersect with a wall
+        if not self.check_enemy_wall_collision(next_ex, self.enemy_y):
+            self.enemy_x = next_ex
+        if not self.check_enemy_wall_collision(self.enemy_x, next_ey):
+            self.enemy_y = next_ey
+
     def check_enemy_hit(self):
-        """Checks bounding box collision between player and enemy."""
-        # Calculates the extent offsets from center coordinates for both entities
+        #Checks bounding box collision between player and enemy.
         half_p = self.player_size / 2
         half_e = self.enemy_size / 2
 
@@ -85,8 +103,7 @@ class App:
         e_left, e_right = self.enemy_x - half_e, self.enemy_x + half_e
         e_top, e_bottom = self.enemy_y - half_e, self.enemy_y + half_e
 
-        # axis-aligned Bounding Box  Overlap Test
-        # this returns True if boxes overlap on both X and Y axes
+        # Overlap test
         if not (
             p_right <= e_left
             or p_left >= e_right
@@ -99,7 +116,7 @@ class App:
     def run_game(self):
         running = True
         while running:
-            # 1. Event Handling
+            # Event handling
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or (
                     event.type == pygame.KEYDOWN
@@ -107,7 +124,7 @@ class App:
                 ):
                     running = False
 
-            # 2. Continuous Input Handling
+            # Controls
             keys = pygame.key.get_pressed()
             dx, dy = 0, 0
             if keys[pygame.K_w] or keys[pygame.K_UP]:
@@ -120,7 +137,7 @@ class App:
             if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
                 dx += self.speed
 
-            # 3. Update Position with Collisions
+            # Update Position with Collisions
             if dx != 0 and not self.check_collision(
                 self.player_x + dx, self.player_y
             ):
@@ -133,7 +150,7 @@ class App:
             # this updates the enemy position
             self.update_enemy()
 
-            # 4. Render Frame
+            # Render Frame
             self.screen.fill((240, 240, 240))  # Background #F0F0F0
             screen_w, screen_h = self.screen.get_size()
             center_x, center_y = screen_w / 2, screen_h / 2
@@ -160,7 +177,7 @@ class App:
             )
             pygame.draw.rect(
                 self.screen, (146, 238, 255), player_rect
-            )  # #92EEFF
+            )  
 
             # this positions the enemy relative to the players position in the world
             # turns the enemy world coordinates to relative screen coordinates 
@@ -174,8 +191,7 @@ class App:
             # this draws the enemy visual 
             pygame.draw.rect(self.screen, (5, 0, 139), enemy_rect)
 
-            # this displays "HIT!" over player position when it o
-            # this renders the hit notification text surface directly above player center if touching
+            # this displays "HIT!
             if self.check_enemy_hit():
                 text_surface = self.font.render("HIT!", True, (255, 0, 0))
                 text_rect = text_surface.get_rect(
@@ -184,7 +200,7 @@ class App:
                 self.screen.blit(text_surface, text_rect)
 
             pygame.display.flip()
-            self.clock.tick(60)  # Locks to 60 FPS
+            self.clock.tick(60)  # Lock to 60 FPS (~16ms per frame)
 
         pygame.quit()
         sys.exit()
