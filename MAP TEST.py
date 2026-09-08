@@ -32,7 +32,7 @@ class App:
         self.max_hit_cooldown = 60
 
         # Load CSV Map and setup boundaries
-        self.grid = self.load_map("map4s.csv")
+        self.grid = self.load_map("Map5.csv")
         self.map_width = max(len(row) for row in self.grid) * TILE_SIZE
         self.map_height = len(self.grid) * TILE_SIZE
         self.walls_world = self.extract_walls_from_grid()
@@ -62,10 +62,10 @@ class App:
 
         self.run_game()
 
-    def load_map(self, map4_filename):
+    def load_map(self, Map5_filename):
         grid = []
         try:
-            with open(map4_filename, mode='r', encoding='utf-8') as file:
+            with open(Map5_filename, mode='r', encoding='utf-8') as file:
                 reader = csv.reader(file)
                 for row in reader:
                     if row:
