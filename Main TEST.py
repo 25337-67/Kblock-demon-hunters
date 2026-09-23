@@ -12,7 +12,7 @@ COLOR_MAP = {   # RGB
     '5': (140, 140, 140),   # Light Gray (Floor)
     '6': (200, 200, 200)    # Lightish Gray (Outside Floor)
 }
-SOLID_TILES = {'1', '2', '3', '4'}  # Walls
+SOLID_TILES = {'0','1', '2', '3', '4'} # Walls
 
 
 class App:
