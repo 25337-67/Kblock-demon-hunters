@@ -10,18 +10,35 @@ COLOR_MAP = {   # RGB
     '3': (40, 40, 40),      # Black Tile (Door)
     '4': (240, 180, 130),   # Orange Tile (Wall)
     '5': (140, 140, 140),   # Light Gray (Floor)
-    '6': (200, 200, 200)    # Lightish Gray (Outside Floor)
-}
+    '6': (200, 200, 200),    # Lightish Gray (Outside Floor)
+    '48': (40, 40, 40), #Science classroom door
+    '49': (40, 40, 40), #SCI door
+    '50': (40, 40, 40), #Maths door
+    '51': (40, 40, 40), #Maths door
+    '52': (40, 40, 40),#Maths door
+    '53': (40, 40, 40), #Maths door
+    '54': (40, 40, 40), #Maths door
+    '55': (40, 40, 40), #Maths door
+    '56': (40, 40, 40), #SCI door
+    '57': (40, 40, 40), #SCI door
+    '58': (40, 40, 40), #SCI door
+    '59': (40, 40, 40), #SCI door
+    '60': (40, 40, 40), #SCI door
+    '61': (40, 40, 40), #SCI door
+} #Doors are black tiles
 SOLID_TILES = {'0','1', '2', '3', '4'} # Walls
-
+Door_Tiles = {'48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61'} # Doors
 
 class App:
 
     def __init__(self):
         #Boot up Pygame
         pygame.init() #initialise pygame
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) #Open in fullscreen
-        pygame.display.set_caption("Northcote K-block demon hunters") #Window title
+        self.screen = pygame.display.set_mode(
+            (0, 0), pygame.FULLSCREEN #Open in fullscreen
+            ) 
+        pygame.display.set_caption("Northcote K-block Demon Hunters") #Window title
+
         self.clock = pygame.time.Clock() #For capping FPS later
         #Player specs
         self.speed = 5
@@ -33,16 +50,20 @@ class App:
         self.player_health = 3
         # the cooldown to prevent losing all 3 hearts instantly when coming into contact with the enemy
         self.hit_cooldown = 0
-        # Iframe duration 60 frames = 1 second buffer at 60 FPS
-        self.max_hit_cooldown = 60 
 
+        self.max_hit_cooldown = 60 # 1 second cooldown at 60 FPS
+
+        # Track active map & defeated rooms
+        self.current_map_file = "MAP - Level 3 (6).csv"
+        self.defeated_rooms = set()  # Remembers cleared classroom files
+        self.locked_message_timer = 0  # Flash warning timer for locked doors
 
         # Load CSV map and set spawns
         self.tile_map = []
-        self.load_map("MAP - Level 3 (2).csv") #Map file name
-        self.set_spawns_from_map()
+        self.load_map(self.current_map_file)
+        self.set_spawns_from_map() #sets the player and enemy spawn positions based on the map data
 
-        # da enemy setup
+        # the enemy setup
         # this is the dimensions of the enemy collision box 20x20 pixels square
         self.enemy_size = 20
         # the movement step per frame in pixels moves 5 units to the player every tick
@@ -84,15 +105,13 @@ class App:
 
         # the State tracking for question popup 
         self.in_question_mode = False  # the flag to pause movement and display the dialogue overlay
-        self.question_timer = 0        # the timer in frames for answering (300 frames = 5 seconds)
+        self.question_timer = 0        # the timer for answering
         self.typewriter_index = 0      # the character counter for animating the question text letter by letter
+
         self.dialogue_full_text = "yo g, Are apples red?"  # the full text string for the dialogue box
 
-        # the font setup for the hit text marker
-        self.font = pygame.font.SysFont("Arial", 24, bold=True)
-
-        # the fonts are styled for dialogue box 
-        self.font = pygame.font.SysFont("Courier New", 22, bold=True)
+        #Fonts
+        self.font = pygame.font.SysFont("Courier New", 22, bold=True) #Dialogue box font
         self.subfont = pygame.font.SysFont("Courier New", 18, bold=True)
 
 
@@ -112,7 +131,7 @@ class App:
     def load_map(self, filename):
         #Loads CSV map data; handles numbers and spawn tags ('P', 'E').
         try:
-            with open(filename, 'r') as f:
+            with open(filename, 'r') as f: #for reading the map file
                 reader = csv.reader(f)
                 for row in reader:
                     map_row = []
@@ -128,12 +147,13 @@ class App:
                         map_row.append(val)
                     self.tile_map.append(map_row)
         except FileNotFoundError:
-            print(f"Error: {filename} not found.")
+            print(f"Error: {filename} not found.") #fallback error message if the map file is missing
 
     def set_spawns_from_map(self):
         #Default fallback spawn coordinates (Column, Row)
         player_col, player_row = 7, 0
-        enemy_col, enemy_row = 8, 0
+        has_enemy_spawn = False
+        enemy_col, enemy_row = 0, 0
 
         for r_idx, row in enumerate(self.tile_map):# Scan map for spawn letters 'P' and 'E'
             for c_idx, tile in enumerate(row):
@@ -147,9 +167,41 @@ class App:
         #calculate pixel coordinates centered inside tiles
         self.player_x = player_col * TILE_SIZE + (TILE_SIZE // 2)
         self.player_y = player_row * TILE_SIZE + (TILE_SIZE // 2)
-        
-        self.enemy_x = enemy_col * TILE_SIZE + (TILE_SIZE // 2)
-        self.enemy_y = enemy_row * TILE_SIZE + (TILE_SIZE // 2)
+
+        if has_enemy_spawn and self.current_map_file not in self.defeated_rooms:
+            self.enemy_active = True
+            self.enemy_health = self.enemy_max_health  # Reset enemy health when spawning
+
+            self.enemy_x = enemy_col * TILE_SIZE + (TILE_SIZE // 2)
+            self.enemy_y = enemy_row * TILE_SIZE + (TILE_SIZE // 2)
+        else:
+            self.enemy_active = False  # No enemy in this room
+
+    def change_room(self, target_map_file, spawn_col, spawn_row):
+        #Changes the current map to a new CSV file and resets player/enemy positions.
+        self.current_map_file = target_map_file
+        self.load_map(target_map_file) #load the new map data from the specified CSV file
+
+        self.player_x = spawn_col * TILE_SIZE + (TILE_SIZE // 2) #divides the tile size by 2 to center the player in the tile
+        self.player_y = spawn_row * TILE_SIZE + (TILE_SIZE // 2)
+
+        has_enemy_spawn = False
+        enemy_col, enemy_row = 0, 0 
+        for r_idx, row in enumerate(self.tile_map):
+            for c_idx, tile in enumerate(row):
+                if tile == 'E':
+                    enemy_col, enemy_row = c_idx, r_idx
+                    has_enemy_spawn = True #spawns on E
+                    self.tile_map[r_idx][c_idx] = '5'  # Replace marker with floor tile
+
+        if has_enemy_spawn and self.current_map_file not in self.defeated_rooms:
+            self.enemy_active = True
+            self.enemy_health = self.enemy_max_health  # Reset enemy health when spawning
+
+            self.enemy_x = enemy_col * TILE_SIZE + (TILE_SIZE // 2)
+            self.enemy_y = enemy_row * TILE_SIZE + (TILE_SIZE // 2)
+        else:
+            self.enemy_active = False  # No enemy in this room
 
     def get_camera_pos(self, screen_w, screen_h):
         #Calculates camera coordinates clamped strictly within map bounds.
@@ -157,6 +209,16 @@ class App:
         p_row = max(0, min(int(self.player_y // TILE_SIZE), len(self.tile_map) - 1))
         p_col = max(0, min(int(self.player_x // TILE_SIZE), len(self.tile_map[0]) - 1))
 
+        p_row = max( #p_row is clamped to ensure it doesn't go out of bounds of the tile map
+            0, 
+            min(int(self.player_y // TILE_SIZE), 
+                len(self.tile_map) - 1)
+            )
+        p_col = max( #p_col is clamped to ensure it doesn't go out of bounds of the tile map
+            0, 
+            min(int(self.player_x // TILE_SIZE), 
+                len(self.tile_map[0]) - 1)
+            )
         #Raycast left and right from player postion to find map boundaries
         left_c = p_col
         while left_c > 0 and self.tile_map[p_row][left_c - 1] is not None:
