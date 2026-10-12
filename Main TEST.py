@@ -25,6 +25,14 @@ COLOR_MAP = {  # RGB
     "59": (40, 40, 40),  # Science Classroom 59 Right Door
     "60": (40, 40, 40),  # Science Classroom 60 Left Door
     "61": (40, 40, 40),  # Science Classroom 61 Right Door
+    "62": (40, 40, 40),  # Food Room 62 Door
+    "63": (40, 40, 40),  # Food Room 63 Door
+    "64": (40, 40, 40),  # Food Room 64 Door
+    "65": (40, 40, 40),  # Food Room 65 Door
+    "66": (40, 40, 40),  # Food Room 66 Door
+    "67": (40, 40, 40),  # Food Room 67 Door
+    "68": (40, 40, 40),  # Food Room 68 Door
+    "69": (40, 40, 40),  # Food Room 69 Door
 }
 
 SOLID_TILES = {"0", "1", "2", "3", "4"}  # Walls
@@ -43,6 +51,14 @@ PORTAL_TILES = {
     "59",
     "60",
     "61",
+    "62",
+    "63",
+    "64",
+    "65",
+    "66",
+    "67",
+    "68",
+    "69",
 }
 
 
@@ -59,8 +75,8 @@ class App:
         )  # Window title
         self.clock = pygame.time.Clock()  # For capping FPS later
 
-        # Track active map & defeated rooms (Updated to Level 3 (6))
-        self.current_map_file = "MAP - Level 3 (6).csv"
+        # Track active map & defeated rooms (Updated to Level 3 (7))
+        self.current_map_file = "MAP - Level 3 (8).csv"
         self.defeated_rooms = set()  # Remembers cleared classroom files
         self.locked_message_timer = 0  # Flash warning timer for locked doors
 
@@ -517,14 +533,14 @@ class App:
 
                     if tile_val in PORTAL_TILES:
                         if (
-                            self.current_map_file != "MAP - Level 3 (6).csv"
+                            self.current_map_file != "MAP - Level 3 (8).csv"
                             and self.enemy_active
                         ):
                             self.locked_message_timer = 90
                             self.player_y -= TILE_SIZE // 2
                         else:
                             if tile_val == "48":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - Science 1 Classroom 48_49.csv",
                                         spawn_col=4,
@@ -532,13 +548,13 @@ class App:
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=9,
                                         spawn_row=13,
                                     )
 
                             elif tile_val == "49":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - Science 1 Classroom 48_49.csv",
                                         spawn_col=31,
@@ -546,13 +562,13 @@ class App:
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=15,
                                         spawn_row=13,
                                     )
 
                             elif tile_val == "50":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - Math classroom Test 50_51.csv",
                                         spawn_col=4,
@@ -560,13 +576,13 @@ class App:
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=18,
                                         spawn_row=13,
                                     )
 
                             elif tile_val == "51":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - Math classroom Test 50_51.csv",
                                         spawn_col=34,
@@ -574,13 +590,13 @@ class App:
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=24,
                                         spawn_row=13,
                                     )
 
                             elif tile_val == "52":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - 52_53.csv",
                                         spawn_col=4,
@@ -588,13 +604,13 @@ class App:
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=27,
                                         spawn_row=13,
                                     )
 
                             elif tile_val == "53":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - 52_53.csv",
                                         spawn_col=34,
@@ -602,13 +618,13 @@ class App:
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=33,
                                         spawn_row=13,
                                     )
 
                             elif tile_val == "54":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - 54_55.csv",
                                         spawn_col=4,
@@ -616,13 +632,13 @@ class App:
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=36,
                                         spawn_row=13,
                                     )
 
                             elif tile_val == "55":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - 54_55.csv",
                                         spawn_col=34,
@@ -630,93 +646,205 @@ class App:
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=42,
                                         spawn_row=13,
                                     )
 
                             elif tile_val == "56":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - Science Classroom 56_57.csv",
-                                        spawn_col=3,
-                                        spawn_row=5,
+                                        spawn_col=4,
+                                        spawn_row=20,
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=16,
-                                        spawn_row=20,
+                                        spawn_row=22,
                                     )
 
                             elif tile_val == "57":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - Science Classroom 56_57.csv",
-                                        spawn_col=28,
-                                        spawn_row=5,
+                                        spawn_col=29,
+                                        spawn_row=20,
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=23,
-                                        spawn_row=20,
+                                        spawn_row=22,
                                     )
 
                             elif tile_val == "58":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - Science Classroom 58_59.csv",
-                                        spawn_col=3,
-                                        spawn_row=5,
+                                        spawn_col=4,
+                                        spawn_row=20,
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=27,
-                                        spawn_row=20,
+                                        spawn_row=22,
                                     )
 
                             elif tile_val == "59":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - Science Classroom 58_59.csv",
-                                        spawn_col=28,
-                                        spawn_row=5,
+                                        spawn_col=29,
+                                        spawn_row=20,
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=33,
-                                        spawn_row=20,
+                                        spawn_row=22,
                                     )
 
                             elif tile_val == "60":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - Science Classroom 60_61.csv",
-                                        spawn_col=3,
-                                        spawn_row=5,
+                                        spawn_col=4,
+                                        spawn_row=20,
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=37,
-                                        spawn_row=20,
+                                        spawn_row=22,
                                     )
 
                             elif tile_val == "61":
-                                if self.current_map_file == "MAP - Level 3 (6).csv":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
                                     self.change_room(
                                         "MAP - Science Classroom 60_61.csv",
-                                        spawn_col=28,
-                                        spawn_row=5,
+                                        spawn_col=29,
+                                        spawn_row=20,
                                     )
                                 else:
                                     self.change_room(
-                                        "MAP - Level 3 (6).csv",
+                                        "Map - Level 3 (8).csv",
                                         spawn_col=45,
-                                        spawn_row=20,
+                                        spawn_row=22,
+                                    )
+
+                            elif tile_val == "62":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
+                                    self.change_room(
+                                        "MAP - Food room 62_63 (4).csv",
+                                        spawn_col=6,
+                                        spawn_row=8,
+                                    )
+                                else:
+                                    self.change_room(
+                                        "Map - Level 3 (8).csv",
+                                        spawn_col=70,
+                                        spawn_row=28,
+                                    )
+
+                            elif tile_val == "63":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
+                                    self.change_room(
+                                        "MAP - Food room 62_63 (4).csv",
+                                        spawn_col=18,
+                                        spawn_row=22,
+                                    )
+                                else:
+                                    self.change_room(
+                                        "Map - Level 3 (8).csv",
+                                        spawn_col=82,
+                                        spawn_row=44,
+                                    )
+
+                            elif tile_val == "64":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
+                                    self.change_room(
+                                        "MAP - Copy of Food room 62_63 (1).csv",
+                                        spawn_col=15,
+                                        spawn_row=27,
+                                    )
+                                else:
+                                    self.change_room(
+                                        "Map - Level 3 (8).csv",
+                                        spawn_col=89,
+                                        spawn_row=40,
+                                    )
+
+                            elif tile_val == "65":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
+                                    self.change_room(
+                                        "MAP - Copy of Food room 62_63 (1).csv",
+                                        spawn_col=34,
+                                        spawn_row=6,
+                                    )
+                                else:
+                                    self.change_room(
+                                        "Map - Level 3 (8).csv",
+                                        spawn_col=101,
+                                        spawn_row=15,
+                                    )
+
+                            elif tile_val == "66":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
+                                    self.change_room(
+                                        "MAP - Food room 66_67.csv",
+                                        spawn_col=14,
+                                        spawn_row=4,
+                                    )
+                                else:
+                                    self.change_room(
+                                        "Map - Level 3 (8).csv",
+                                        spawn_col=81,
+                                        spawn_row=61,
+                                    )
+
+                            elif tile_val == "67":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
+                                    self.change_room(
+                                        "MAP - Food room 66_67.csv",
+                                        spawn_col=14,
+                                        spawn_row=23,
+                                    )
+                                else:
+                                    self.change_room(
+                                        "Map - Level 3 (8).csv",
+                                        spawn_col=81,
+                                        spawn_row=72,
+                                    )
+
+                            elif tile_val == "68":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
+                                    self.change_room(
+                                        "MAP - Food room 68_69 (1).csv",
+                                        spawn_col=21,
+                                        spawn_row=4,
+                                    )
+                                else:
+                                    self.change_room(
+                                        "Map - Level 3 (8).csv",
+                                        spawn_col=89,
+                                        spawn_row=61,
+                                    )
+
+                            elif tile_val == "69":
+                                if self.current_map_file == "Map - Level 3 (8).csv":
+                                    self.change_room(
+                                        "MAP - Food room 68_69 (1).csv",
+                                        spawn_col=21,
+                                        spawn_row=27,
+                                    )
+                                else:
+                                    self.change_room(
+                                        "Map - Level 3 (8).csv",
+                                        spawn_col=89,
+                                        spawn_row=77,
                                     )
 
             if self.enemy_stun_timer > 0:
