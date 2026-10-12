@@ -25,9 +25,17 @@ COLOR_MAP = {   # RGB
     '59': (40, 40, 40), #SCI door
     '60': (40, 40, 40), #SCI door
     '61': (40, 40, 40), #SCI door
+    "62": (40, 40, 40),  # Food Room 62 Door
+    "63": (40, 40, 40),  # Food Room 63 Door
+    "64": (40, 40, 40),  # Food Room 64 Door
+    "65": (40, 40, 40),  # Food Room 65 Door
+    "66": (40, 40, 40),  # Food Room 66 Door
+    "67": (40, 40, 40),  # Food Room 67 Door
+    "68": (40, 40, 40),  # Food Room 68 Door
+    "69": (40, 40, 40),  # Food Room 69 Door
 } #Doors are black tiles
 SOLID_TILES = {'0','1', '2', '3', '4'} # Walls
-Door_Tiles = {'48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61'} # Doors
+Door_Tiles = {'48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', '69'} # Doors
 
 class App:
 
@@ -54,7 +62,7 @@ class App:
         self.max_hit_cooldown = 60 # 1 second cooldown at 60 FPS
 
         # Track active map & defeated rooms
-        self.current_map_file = "MAP - Level 3 (6).csv"
+        self.current_map_file = "MAP - Level 3 (8).csv"
         self.defeated_rooms = set()  # Remembers cleared classroom files
         self.locked_message_timer = 0  # Flash warning timer for locked doors
 
@@ -219,10 +227,12 @@ class App:
             min(int(self.player_x // TILE_SIZE), 
                 len(self.tile_map[0]) - 1)
             )
+        
         #Raycast left and right from player postion to find map boundaries
         left_c = p_col
         while left_c > 0 and self.tile_map[p_row][left_c - 1] is not None:
             left_c -= 1
+
         right_c = p_col
         while right_c < len(self.tile_map[0]) - 1 and self.tile_map[p_row][right_c + 1] is not None:
             right_c += 1
@@ -230,11 +240,12 @@ class App:
         top_r = p_row
         while top_r > 0 and self.tile_map[top_r - 1][p_col] is not None:
             top_r -= 1
+
         bottom_r = p_row
         while bottom_r < len(self.tile_map) - 1 and self.tile_map[bottom_r + 1][p_col] is not None:
             bottom_r += 1
 
-        min_x = left_c * TILE_SIZE
+        min_x = left_c * TILE_SIZE 
         max_x = (right_c + 1) * TILE_SIZE
         min_y = top_r * TILE_SIZE
         max_y = (bottom_r + 1) * TILE_SIZE
