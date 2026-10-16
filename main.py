@@ -56,6 +56,7 @@ class App:
         #player stuff
         self.speed = 5
         self.player_size = 20
+        self.player_render_size = 65 #sprite
         self.max_health = 3
         self.player_health = 3
 
@@ -67,12 +68,22 @@ class App:
         
          #Enemy movement setup
         self.enemy_size = 20
+        self.enemy_render_size = 90 #sprite
         self.enemy_speed = 5
         
         self.enemy_max_health = 100
         self.enemy_health = 100
+
+         #Load and scale sprites
+        self.player_img = pygame.image.load("Boii.webp").convert_alpha() 
+        self.player_img = pygame.transform.scale(self.player_img, (self.player_render_size, self.player_render_size))
+        
+        self.enemy_img = pygame.image.load("unnamed.png").convert_alpha()
+        self.enemy_img = pygame.transform.scale(self.enemy_img, (self.enemy_render_size, self.enemy_render_size))
+        
         self.enemy_active = False
         self.set_spawns_from_map()
+       
 
         #Player attack setup
         self.attack_range = 30
@@ -905,33 +916,32 @@ class App:
             #Draw the player
             player_screen_x = self.player_x - cam_x
             player_screen_y = self.player_y - cam_y
-            half_p = self.player_size / 2
-            player_rect = pygame.Rect(
-                player_screen_x - half_p,
-                player_screen_y - half_p,
-                self.player_size,
-                self.player_size,
+            half_p_render = self.player_render_size / 2
+
+            player_render_rect = pygame.Rect(
+                player_screen_x - half_p_render,
+                player_screen_y - half_p_render,
+                self.player_render_size,
+                self.player_render_size,
             )
-            pygame.draw.rect(
-                self.screen, (146, 238, 255), player_rect
-            )
+            # Method draws image on player
+            self.screen.blit(self.player_img, player_render_rect.topleft)
 
             #Draw the enemy
             if self.enemy_active:
-                half_e = self.enemy_size / 2
-                ex1 = (self.enemy_x - cam_x) - half_e
-                ey1 = (self.enemy_y - cam_y) - half_e
-                enemy_rect = pygame.Rect(
-                    ex1, ey1, self.enemy_size, self.enemy_size
+                half_e_render = self.enemy_render_size / 2
+                ex1 = (self.enemy_x - cam_x) - half_e_render
+                ey1 = (self.enemy_y - cam_y) - half_e_render
+                enemy_render_rect = pygame.Rect(
+                    ex1, ey1, self.enemy_render_size, self.enemy_render_size
                 )
-                enemy_color = ((255, 215, 0) if self.enemy_stun_timer > 0 else (5, 0, 139)
-                               )
-                pygame.draw.rect(self.screen, enemy_color, enemy_rect)
+                # Method draws image on enemy
+                self.screen.blit(self.enemy_img, enemy_render_rect.topleft)
 
             #Show stun indicator
             if self.enemy_stun_timer > 0:
                 stun_surface = self.font.render("STUNNED!", True, (255, 140, 0))
-                stun_rect = stun_surface.get_rect(center=(ex1 + half_e, ey1 - 15))
+                stun_rect = stun_surface.get_rect(center=(ex1 + half_e_render, ey1 - 15))
                 self.screen.blit(stun_surface, stun_rect)
 
             #Show contact indicator
