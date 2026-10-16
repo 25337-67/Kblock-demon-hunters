@@ -415,6 +415,36 @@ class App:
 
         self.screen.blit(timer_surface, (box_x + box_w - 150, box_y + box_h - 35))
 
+    def player_respawnyes(self):
+    #this return to the original map and its P spawn marker
+        self.current_map = "MAP - Level 3 (8).csv"
+        self.load_map(self.current_map)
+        self.set_spawns_from_map()
+    #sets dthe player back to full health
+        self.player_health = self.max_health
+    #everythin below here clears unfinished stuf
+        self.in_question_mode = False
+        self.question_timer = 0
+        self.typewriter_index = 0
+        self.hit_cooldown = self.max_hit_cooldown
+        self.enemy_stun_timer = 0
+        self.enemy_stun_hits = 0
+        self.knockback_frames = 0
+        self.knockback_step_x = 0
+        self.knockback_step_y = 0
+        self.locked_message_timer = 0
+
+    def death_screen(self):
+            screen_w, screen_h = self.screen.get_size()
+            message = self.font.render("U acc Suck, Press R", True, (255, 255, 255))
+            self.screen.blit(
+                message,
+                message.get_rect(center=(screen_w // 2, screen_h // 2))
+            )
+            pygame.display.flip()
+            self.clock.tick(60)
+
+
     def run_game(self):
         running = True
         while running:
@@ -425,6 +455,12 @@ class App:
                     and event.key == pygame.K_ESCAPE
                 ):
                     running = False
+
+                  #checks if player is dead and if r is pressed, if is pressed then call player_respawnyes
+                if self.player_health <= 0:
+                  if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                      self.player_respawnyes()
+                    
 
                 #Handle question answers
                 if self.in_question_mode and event.type == pygame.KEYDOWN:
@@ -457,7 +493,8 @@ class App:
                         if self.enemy_stun_hits >= self.max_stun_hits:
                             self.enemy_stun_timer = 0
 
-            #Handle player movement
+
+            # player movement
             if not self.in_question_mode:#this completely disables the movement while in question mode
                 keys = pygame.key.get_pressed()
                 dx, dy = 0, 0
@@ -838,6 +875,12 @@ class App:
                     self.in_question_mode = False
                     self.hit_cooldown = self.max_hit_cooldown
 
+
+            #if the player health is 0 or les then call the deathscreenfucntion
+            if self.player_health <= 0:
+                self.death_screen()
+                continue#i use this to skip
+
             #Render the game
             self.screen.fill((240, 240, 240)) #Background
 
@@ -916,6 +959,7 @@ class App:
                 )
                 self.screen.blit(msg_surface, msg_rect)
 
+            
             #Show the active question
             if self.in_question_mode:
                 self.draw_dialogue_box()
