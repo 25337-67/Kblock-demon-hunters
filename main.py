@@ -1,6 +1,7 @@
 import sys
 import pygame
 import csv
+import random
 
 TILE_SIZE = 40
 
@@ -45,6 +46,7 @@ class App:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.screen_w, self.screen_h = self.screen.get_size()
         pygame.display.set_caption("Northcote K-block demon hunters")
         self.clock = pygame.time.Clock()
 
@@ -59,6 +61,9 @@ class App:
         self.player_render_size = 65 #sprite
         self.max_health = 3
         self.player_health = 3
+
+        #STORY RAH
+        self.show_prologue = True
 
         self.hit_cooldown = 0
         self.max_hit_cooldown = 60
@@ -104,6 +109,14 @@ class App:
         self.question_timer = 0    # the timer for answering
 
         self.typewriter_index = 0   # the character counter for animating the question text letter by letter
+        self.questions = [
+        "Is melting an endothermic process?",
+        "Is combustion always an exothermic reaction",
+        "is delta H always a state function?",
+        "Is Eddie Latu handsome and hot?",
+        "is travis the best gak,mm2,tsb player ever?",
+        "should travis spend 1000 robux on gakuran"
+        ]
         self.dialogue_full_text = "yo g, Are apples red?" # the full text string for the dialogue box
 
         #Fonts
@@ -378,7 +391,7 @@ class App:
             return
 
         #Draw enemy health bar
-        screen_w, screen_h = self.screen.get_size() #get_size() gets screen width and height
+        screen_w, screen_h = self.screen_w, self.screen_h #get_size() gets screen width and height
         bar_width = 400
         bar_height = 20
         bar_x = (screen_w - bar_width) // 2 #center the bar horizontally
@@ -395,7 +408,7 @@ class App:
     def draw_dialogue_box(self):
 
         #Draw question box, answers and timer
-        screen_w, screen_h = self.screen.get_size() #get_size gets screen width and height
+        screen_w, screen_h = self.screen_w, self.screen_h
 
         box_w, box_h = 600, 160
         box_x = (screen_w - box_w) // 2
@@ -445,15 +458,80 @@ class App:
         self.knockback_step_y = 0
         self.locked_message_timer = 0
 
+
+    def amazin_realistic_lovely_prologue(self):
+        self.screen.fill((0, 0, 0))
+
+        lines = [
+        "Mr Kevin Kim cooked up a chemical that turns people into demons",
+        "that suck your soul out, rip out doors and make the walls",
+        "paper thin that you can punch through.",
+        "",
+        "All the students got evacuated, but you got to school late",
+        "and went to your first class in K-block.",
+        "",
+        "Conner Murphy was the last survivor and tasked you with",
+        "delivering the antidote to the main source of the demon chemical.",
+        "",
+        "To complete this task, he gave you the ultimate weapon:",
+        "MMA lessons.",
+        "",
+        "Press SPACE to begin"
+    ]
+
+        for i, line in enumerate(lines):
+            text = self.subfont.render(line, True, (255, 255, 255))
+            self.screen.blit(text, (80, 80 + i * 35))
+
+        pygame.display.flip()
+
     def death_screen(self):
-            screen_w, screen_h = self.screen.get_size()
-            message = self.font.render("U acc Suck, Press R", True, (255, 255, 255))
+            screen_w, screen_h = self.screen_w, self.screen_h
+            specialphonk_font = pygame.font.SysFont("Courier New", 40, bold=True)
+            message = specialphonk_font.render("U acc Suck, Press R", True, (0, 0, 0))
             self.screen.blit(
                 message,
                 message.get_rect(center=(screen_w // 2, screen_h // 2))
             )
             pygame.display.flip()
             self.clock.tick(60)
+
+
+    def victory_screen(self):
+        screen_w, screen_h = self.screen_w, self.screen_h
+
+        title_font = pygame.font.SysFont("courier", 40)
+        message_font = pygame.font.SysFont("courier", 22)
+
+        title = title_font.render("VICTORY!", True, (255, 255, 255))
+
+        lines = [
+            "Congratulations! You have hunted all the demons in K-block.",
+            "Instead of delivering the antidote, you completely forgot about it.",
+            "Northcote College is extremely thankful and decides to give you",
+            "$1,000,000 and the keys to Eddie's house!",
+            "",
+            "Press E to Exit"
+        ]
+
+        self.screen.fill((0, 0, 0))
+
+        self.screen.blit(
+            title,
+            (screen_w // 2 - title.get_width() // 2, screen_h // 2 - 150)
+        )
+
+        for i, line in enumerate(lines):
+            text = message_font.render(line, True, (255, 255, 255))
+
+            self.screen.blit(
+                text,
+                (screen_w // 2 - text.get_width() // 2,
+                screen_h // 2 - 70 + i * 35)
+            )
+
+
+
 
 
     def run_game(self):
@@ -467,11 +545,20 @@ class App:
                 ):
                     running = False
 
+
+            
+
+                if self.show_prologue and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                 self.show_prologue = False
+
                   #checks if player is dead and if r is pressed, if is pressed then call player_respawnyes
                 if self.player_health <= 0:
                   if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                       self.player_respawnyes()
-                    
+
+                if len(self.defeated_rooms) >= 7:
+                               if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+                                running = False
 
                 #Handle question answers
                 if self.in_question_mode and event.type == pygame.KEYDOWN:
@@ -502,7 +589,21 @@ class App:
                             self.defeated_rooms.add(self.current_map)
 
                         if self.enemy_stun_hits >= self.max_stun_hits:
-                            self.enemy_stun_timer = 0
+                            self.enemy_stun_timer = 0   
+
+            
+        #Prologue display check
+            if self.show_prologue:
+               self.amazin_realistic_lovely_prologue()
+               self.clock.tick(60)
+               continue
+
+             #if the player health is 0 or les then call the deathscreenfucntion
+            if self.player_health <= 0:
+                self.death_screen()
+                continue#this to skip the rest of the game to freeze gameplay
+
+
 
 
             # player movement
@@ -875,6 +976,7 @@ class App:
                 self.in_question_mode = True
                 self.question_timer = 300 # 5 Seconds at 60 FPS (300 ticks)
                 self.typewriter_index = 0 # the reset text animation index
+                self.dialogue_full_text = random.choice(self.questions)#picks a choice from questions list
 
             #Update question text and timer
             if self.in_question_mode:
@@ -887,15 +989,10 @@ class App:
                     self.hit_cooldown = self.max_hit_cooldown
 
 
-            #if the player health is 0 or les then call the deathscreenfucntion
-            if self.player_health <= 0:
-                self.death_screen()
-                continue#i use this to skip
-
             #Render the game
             self.screen.fill((240, 240, 240)) #Background
 
-            screen_w, screen_h = self.screen.get_size()
+            screen_w, screen_h = self.screen_w, self.screen_h
 
             #Get the camera position based on the player's position and the map boundaries
             cam_x, cam_y = self.get_camera_pos(screen_w, screen_h) 
@@ -973,6 +1070,11 @@ class App:
             #Show the active question
             if self.in_question_mode:
                 self.draw_dialogue_box()
+
+            if len(self.defeated_rooms) >= 7:
+             self.victory_screen()
+
+
             pygame.display.flip()
             self.clock.tick(60) #Lock to 60 FPS
         pygame.quit() #Clean exit when loop breaks
