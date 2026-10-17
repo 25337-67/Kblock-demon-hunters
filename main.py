@@ -114,8 +114,15 @@ class App:
         "Is combustion always an exothermic reaction",
         "is delta H always a state function?",
         "Is Eddie Latu handsome and hot?",
-        "is travis the best gak,mm2,tsb player ever?",
-        "should travis spend 1000 robux on gakuran"
+        "Is Travis Marcelino handome and hot?",
+        "Releasing heat is an exothermic reaction?",
+        "Argon has 18 electrons",
+        "Krypton has 35 electrons",
+        "Dipole-dipole forces are used in melting points?",
+        "Is Chemistry the hardest science in NCEA?",
+        "Linear shape has bond angle of 180?",
+        "Octahedral shape has bond angle of 90?",
+        "There are more than 36 elements on the period table?",
         ]
         self.dialogue_full_text = "yo g, Are apples red?" # the full text string for the dialogue box
 
@@ -509,7 +516,7 @@ class App:
             "Congratulations! You have hunted all the demons in K-block.",
             "Instead of delivering the antidote, you completely forgot about it.",
             "Northcote College is extremely thankful and decides to give you",
-            "$1,000,000 and the keys to Eddie's house!",
+            "2 Excellence credits!",
             "",
             "Press E to Exit"
         ]
